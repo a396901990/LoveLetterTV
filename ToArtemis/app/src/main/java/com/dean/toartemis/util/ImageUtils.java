@@ -164,7 +164,7 @@ public class ImageUtils {
 
         if (imageNameArray != null && imageNameArray.length > 0 && folderName != null && !folderName.replaceAll(" ", "").trim().equals("")) {
             for (String imageName : imageNameArray) {
-                imagePathList.add(new StringBuffer(folderName).append(File.separator).append(imageName).toString());
+                imagePathList.add(new StringBuffer("file:///android_asset/" + folderName).append(File.separator).append(imageName).toString());
             }
         }
 

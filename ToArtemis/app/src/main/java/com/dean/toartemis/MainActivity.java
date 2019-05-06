@@ -1,7 +1,6 @@
 package com.dean.toartemis;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -16,20 +15,22 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.dean.toartemis.R;
 import com.dean.toartemis.factory.ImageNameFactory;
-import com.dean.toartemis.util.ClickUtils;
 import com.dean.toartemis.util.DeviceInfo;
 import com.dean.toartemis.util.ImageUtils;
 import com.dean.toartemis.view.bluesnow.FlowerView;
 import com.dean.toartemis.view.heart.HeartLayout;
 import com.dean.toartemis.view.typewriter.TypeTextView;
 import com.dean.toartemis.view.whitesnow.SnowView;
+import com.youth.banner.Banner;
+import com.youth.banner.BannerConfig;
+import com.youth.banner.Transformer;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -47,6 +48,7 @@ public class MainActivity extends Activity {
     private static final String LOVE = "心动是等你的留言，渴望是常和你见面，甜蜜是和你小路流连，温馨是看着你清澈的双眼，爱你的感觉真的妙不可言！";
     private static final int SNOW_BLOCK = 1;
     public static final String URL = "file:///android_asset/index.html";
+    public static final String URL_1 = "file:///android_asset/dongyu/linzhengxin.jpg";
     private Canvas mCanvas;
     private int mCounter;
     private FlowerView mBlueSnowView;//蓝色的雪花
@@ -56,8 +58,7 @@ public class MainActivity extends Activity {
         }
     };
     private HeartLayout mHeartLayout;//垂直方向的漂浮的红心
-    private ImageView mImageView;//图片
-    private Bitmap mManyBitmapSuperposition;
+
     private ProgressBar mProgressBar;
     private Random mRandom = new Random();
     private Random mRandom2 = new Random();
@@ -95,6 +96,15 @@ public class MainActivity extends Activity {
     }
 
     private void initView() {
+        Banner banner = (Banner) findViewById(R.id.banner);
+        banner.setImageLoader(new GlideImageLoader());
+        ArrayList<String> images = ImageUtils.getAssetsImageNamePathList(MainActivity.this.getApplicationContext(), "dongyu");
+        banner.setImages(images);
+        banner.setBannerAnimation(Transformer.ForegroundToBackground);
+        banner.isAutoPlay(true);
+        banner.setDelayTime(3000);
+        banner.start();
+
         mWebViwFrameLayout = (FrameLayout) findViewById(R.id.fl_webView_layout);
         root_fragment_layout = (FrameLayout) findViewById(R.id.root_fragment_layout);
         textview = (TextView) findViewById(R.id.textview);
@@ -111,7 +121,6 @@ public class MainActivity extends Activity {
         this.mHeartLayout = (HeartLayout) findViewById(R.id.heart_o_red_layout);
         this.mTypeTextView = (TypeTextView) findViewById(R.id.typeTextView);
         this.mWhiteSnowView = (SnowView) findViewById(R.id.whiteSnowView);
-        this.mImageView = (ImageView) findViewById(R.id.image);
         this.mProgressBar = (ProgressBar) findViewById(R.id.progressbar);
         this.mBlueSnowView = (FlowerView) findViewById(R.id.flowerview);
         this.mBlueSnowView.setWH(DeviceInfo.mScreenWidthForPortrait, DeviceInfo.mScreenHeightForPortrait, DeviceInfo.mDensity);
@@ -125,7 +134,6 @@ public class MainActivity extends Activity {
                 MainActivity.this.mHandler.sendMessage(msg);
             }
         };
-        rxJavaSolveMiZhiSuoJinAndNestedLoopAndCallbackHell();
         this.myTimer.schedule(this.mTask, 3000, 10);
         clickEvent();
         this.mTypeTextView.setOnTypeViewListener(new TypeTextView.OnTypeViewListener() {
@@ -180,83 +188,15 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void createSingleImageFromMultipleImages(Bitmap bitmap, int mCounter) {
-        if (mCounter == 0) {
-            //TODO:Caused by: java.lang.OutOfMemoryError
-            try {
-                this.mManyBitmapSuperposition = Bitmap.createBitmap(DeviceInfo.mScreenWidthForPortrait, DeviceInfo.mScreenHeightForPortrait, bitmap.getConfig());
-                this.mCanvas = new Canvas(this.mManyBitmapSuperposition);
-            } catch (OutOfMemoryError error) {
-                error.printStackTrace();
-                System.gc();
-            } finally {
-
-            }
-        }
-        if (this.mCanvas != null) {
-            int number = DeviceInfo.mScreenHeightForPortrait / 64;
-            if (mCounter >= (mCounter / number) * number && mCounter < ((mCounter / number) + SNOW_BLOCK) * number) {
-                this.mCanvas.drawBitmap(bitmap, (float) ((mCounter / number) * 64), (float) ((mCounter % number) * 64), null);
-            }
-        }
-    }
-
-    private void rxJavaSolveMiZhiSuoJinAndNestedLoopAndCallbackHell() {
-        Observable.from(ImageNameFactory.getAssetImageFolderName())
-                .flatMap(new Func1<String, Observable<String>>() {
-                    public Observable<String> call(String folderName) {
-                        return Observable.from(ImageUtils.getAssetsImageNamePathList(MainActivity.this.getApplicationContext(), folderName));
-                    }
-                }).filter(new Func1<String, Boolean>() {
-            public Boolean call(String imagePathNameAll) {
-                return Boolean.valueOf(imagePathNameAll.endsWith(MainActivity.JPG));
-            }
-        }).map(new Func1<String, Bitmap>() {
-            public Bitmap call(String imagePathName) {
-                return ImageUtils.getImageBitmapFromAssetsFolderThroughImagePathName(MainActivity.this.getApplicationContext(), imagePathName, DeviceInfo.mScreenWidthForPortrait, DeviceInfo.mScreenHeightForPortrait);
-            }
-        }).map(new Func1<Bitmap, Void>() {
-            public Void call(Bitmap bitmap) {
-                MainActivity.this.createSingleImageFromMultipleImages(bitmap, MainActivity.this.mCounter);
-                MainActivity.this.mCounter = MainActivity.this.mCounter++;
-                return null;
-            }
-        }).subscribeOn(Schedulers.io())
-                .doOnSubscribe(new Action0() {
-                    public void call() {
-                        MainActivity.this.mProgressBar.setVisibility(View.VISIBLE);
-                    }
-                }).observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Void>() {
-                    public void onCompleted() {
-                        MainActivity.this.mImageView.setImageBitmap(MainActivity.this.mManyBitmapSuperposition);
-                        MainActivity.this.mProgressBar.setVisibility(View.GONE);
-                        MainActivity.this.showAllViews();
-                    }
-
-                    public void onError(Throwable e) {
-                    }
-
-                    public void onNext(Void aVoid) {
-                    }
-                });
-    }
-
     private void showAllViews() {
-        this.mImageView.setVisibility(View.VISIBLE);
         this.mWhiteSnowView.setVisibility(View.VISIBLE);
+
+
+
     }
 
     private void clickEvent() {
 
-        mImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!ClickUtils.isFastDoubleClick()) {
-                    delayShowAll(0L);
-                }
-            }
-        });
     }
 
     private void gotoNext() {

@@ -4,17 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/image"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
+    <com.youth.banner.Banner
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/banner"
         android:background="@android:color/black"
-        android:clickable="true"
-        android:contentDescription=""
-        android:focusable="true"
-        android:scaleType="center"
-        android:visibility="visible"/>
+        app:indicator_width="0dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
     <FrameLayout
         android:id="@+id/fl_webView_layout"
@@ -42,7 +38,7 @@
         android:id="@+id/whiteSnowView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"/>
+        android:visibility="visible"/>
 
     <ProgressBar
         android:id="@+id/progressbar"
