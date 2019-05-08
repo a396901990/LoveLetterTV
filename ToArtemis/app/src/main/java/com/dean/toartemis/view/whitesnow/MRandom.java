@@ -1,9 +1,9 @@
 package com.dean.toartemis.view.whitesnow;
 
-class Random {
+class MRandom {
     private static final java.util.Random RANDOM = new java.util.Random();
 
-    Random() {
+    MRandom() {
     }
 
     public float getRandom(float lower, float upper) {

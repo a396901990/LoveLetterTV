@@ -17,16 +17,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-    <com.dean.toartemis.view.typewriter.TypeTextView
-        android:id="@+id/typeTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginLeft="50dp"
-        android:layout_marginRight="55dp"
-        android:gravity="center"
-        android:paddingBottom="55dp"
-        android:textColor="#fcaebb"/>
 
     <com.dean.toartemis.view.bluesnow.FlowerView
         android:id="@+id/flowerview"
@@ -57,14 +47,26 @@
         android:background="@android:color/transparent"
         android:visibility="gone"/>
 
+    <com.dean.toartemis.view.typewriter.TypeTextView
+        android:id="@+id/typeTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="55dp"
+        android:gravity="center"
+        android:paddingBottom="55dp"
+        android:textSize="@dimen/lb_browse_header_text_size"
+        android:textColor="#FFF"/>
+
     <TextView
         android:id="@+id/textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="8dp"
-        android:background="@android:color/holo_green_light"
-        android:padding="4dp"
+        android:layout_gravity="bottom|right"
+        android:layout_margin="10dp"
+        android:background="@android:color/holo_red_dark"
+        android:padding="8dp"
         android:text="点击有惊喜"
         android:textColor="#fff"
         android:textSize="16sp"

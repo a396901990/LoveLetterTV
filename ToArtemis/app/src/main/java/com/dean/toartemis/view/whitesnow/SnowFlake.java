@@ -1,8 +1,11 @@
 package com.dean.toartemis.view.whitesnow;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
+
+import java.util.Random;
 
 class SnowFlake {
     private static final float ANGE_RANGE = 0.1f;
@@ -19,14 +22,35 @@ class SnowFlake {
     private final float increment;
     private final Paint paint;
     private final Point position;
-    private final Random random;
+    private final MRandom random;
 
-    public static SnowFlake create(int width, int height, Paint paint) {
-        Random random = new Random();
+    public static SnowFlake create(int width, int height, Paint paint1) {
+        MRandom random = new MRandom();
+        Paint paint = new Paint(1);
+        paint.setColor(getRandomColor());
+        paint.setAlpha(140);
+        paint.setStyle(Paint.Style.FILL);
         return new SnowFlake(random, new Point(random.getRandom(width), random.getRandom(height)), (((random.getRandom((float) ANGLE_SEED) / ANGLE_SEED) * ANGE_RANGE) + HALF_PI) - HALF_ANGLE_RANGE, random.getRandom(INCREMENT_LOWER, INCREMENT_UPPER), random.getRandom(FLAKE_SIZE_LOWER, FLAKE_SIZE_UPPER), paint);
     }
 
-    SnowFlake(Random random, Point position, float angle, float increment, float flakeSize, Paint paint) {
+    public  static int getRandomColor(){
+        Random random=new Random();
+        int r=0;
+        int g=0;
+        int b=0;
+        for(int i=0;i<2;i++){
+            //       result=result*10+random.nextInt(10);
+            int temp=random.nextInt(16);
+            r=r*16+temp;
+            temp=random.nextInt(16);
+            g=g*16+temp;
+            temp=random.nextInt(16);
+            b=b*16+temp;
+        }
+        return Color.rgb(r,g,b);
+    }
+
+    SnowFlake(MRandom random, Point position, float angle, float increment, float flakeSize, Paint paint) {
         this.random = random;
         this.position = position;
         this.angle = angle;

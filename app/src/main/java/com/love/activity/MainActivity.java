@@ -2,10 +2,13 @@ package com.love.activity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.AssetFileDescriptor;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -30,6 +33,7 @@ import com.love.view.heart.HeartLayout;
 import com.love.view.typewriter.TypeTextView;
 import com.love.view.whitesnow.SnowView;
 
+import java.io.File;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -67,6 +71,7 @@ public class MainActivity extends Activity {
     private WebView mWebView;
     private SnowView mWhiteSnowView;//白色的雪花
     private Timer myTimer = null;
+    private MediaPlayer mediaPlayer = new MediaPlayer();
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,15 +80,27 @@ public class MainActivity extends Activity {
         initView();
         initWebView();
         bindListener();
+        initMediaPlayer();
         delayShowAll(3000L);
-
     }
-
 
     private FrameLayout mWebViwFrameLayout = null;
     private FrameLayout root_fragment_layout = null;
     private TextView textview = null;
 
+    private void initMediaPlayer() {
+        try {
+            AssetManager assetManager = getAssets();
+            AssetFileDescriptor fileDescriptor = assetManager.openFd("test.mp3");
+            mediaPlayer.setDataSource(fileDescriptor.getFileDescriptor(),fileDescriptor.getStartOffset(),
+                    fileDescriptor.getStartOffset());
+            mediaPlayer.setLooping(true);//设置为循环播放
+            mediaPlayer.prepare();//初始化播放器MediaPlayer
+            mediaPlayer.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     private void initWebView() {
 
         this.mWebSettings = this.mWebView.getSettings();

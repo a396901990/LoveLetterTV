@@ -137,7 +137,7 @@ public class FlowerView extends View {
     }
 
     public void loadFlower() {
-        Observable.just(Integer.valueOf(R.mipmap.pink_snow))
+        Observable.just(Integer.valueOf(R.mipmap.rose))
                 .map(new Func1<Integer, Bitmap>() {
                     public Bitmap call(Integer integer) {
                         return ((BitmapDrawable) FlowerView.this.getResources().getDrawable(integer.intValue())).getBitmap();

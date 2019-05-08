@@ -1,10 +1,13 @@
 package com.dean.toartemis;
 
 import android.app.Activity;
+import android.content.res.AssetFileDescriptor;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -44,6 +47,7 @@ import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class MainActivity extends Activity {
+
     private static final String JPG = ".jpg";
     private static final String LOVE = "心动是等你的留言，渴望是常和你见面，甜蜜是和你小路流连，温馨是看着你清澈的双眼，爱你的感觉真的妙不可言！";
     private static final int SNOW_BLOCK = 1;
@@ -68,6 +72,7 @@ public class MainActivity extends Activity {
     private WebView mWebView;
     private SnowView mWhiteSnowView;//白色的雪花
     private Timer myTimer = null;
+    private MediaPlayer mediaPlayer = new MediaPlayer();
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,14 +81,29 @@ public class MainActivity extends Activity {
         initView();
         initWebView();
         bindListener();
+        initMediaPlayer();
         delayShowAll(3000L);
-
+        showAllViews();
     }
 
 
     private FrameLayout mWebViwFrameLayout = null;
     private FrameLayout root_fragment_layout = null;
     private TextView textview = null;
+
+    private void initMediaPlayer() {
+        try {
+            AssetManager assetManager = getAssets();
+            AssetFileDescriptor fileDescriptor = assetManager.openFd("test.mp3");
+            mediaPlayer.setDataSource(fileDescriptor.getFileDescriptor(),fileDescriptor.getStartOffset(),
+                    fileDescriptor.getStartOffset());
+            mediaPlayer.setLooping(true);//设置为循环播放
+            mediaPlayer.prepare();//初始化播放器MediaPlayer
+//            mediaPlayer.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     private void initWebView() {
 
@@ -138,6 +158,7 @@ public class MainActivity extends Activity {
         clickEvent();
         this.mTypeTextView.setOnTypeViewListener(new TypeTextView.OnTypeViewListener() {
             public void onTypeStart() {
+                MainActivity.this.mWhiteSnowView.setVisibility(View.GONE);
             }
 
             public void onTypeOver() {
@@ -155,6 +176,7 @@ public class MainActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         cancelTimer();
+        mediaPlayer.stop();
         if (this.mWebView != null) {
             //            this.mWebView.clearCache(true);
             //            this.mWebView.clearHistory();
@@ -190,9 +212,13 @@ public class MainActivity extends Activity {
 
     private void showAllViews() {
         this.mWhiteSnowView.setVisibility(View.VISIBLE);
-
-
-
+        this.textview.setVisibility(View.VISIBLE);
+        this.textview.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                delayDo();
+            }
+        });
     }
 
     private void clickEvent() {
@@ -242,19 +268,7 @@ public class MainActivity extends Activity {
         Observable.timer(0, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Long>() {
                     public void onCompleted() {
-                        MainActivity.this.mWhiteSnowView.setVisibility(View.GONE);
-                        MainActivity.this.mWebView.setVisibility(View.VISIBLE);
-                        MainActivity.this.textview.setVisibility(View.VISIBLE);
-                        MainActivity.this.delayShow(5100);//延时显示显示打印机
-                        MainActivity.this.mWebView.loadUrl(MainActivity.URL);
-                        MainActivity.this.textview.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                //                                MainActivity.this.mWebView.loadUrl("file:///android_asset/love.html");
-//                                startActivity(new Intent(MainActivity.this, BrowserActivity.class));
-                            }
-                        });
-
+                        MainActivity.this.delayShow(1000);//延时显示显示打印机
                     }
 
                     public void onError(Throwable e) {
