@@ -3,26 +3,24 @@ package com.dean.toartemis;
 import android.app.Activity;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
+import android.widget.Toast;
 
-import com.dean.toartemis.factory.ImageNameFactory;
 import com.dean.toartemis.util.DeviceInfo;
 import com.dean.toartemis.util.ImageUtils;
 import com.dean.toartemis.view.bluesnow.FlowerView;
@@ -30,11 +28,9 @@ import com.dean.toartemis.view.heart.HeartLayout;
 import com.dean.toartemis.view.typewriter.TypeTextView;
 import com.dean.toartemis.view.whitesnow.SnowView;
 import com.youth.banner.Banner;
-import com.youth.banner.BannerConfig;
 import com.youth.banner.Transformer;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -43,13 +39,10 @@ import java.util.concurrent.TimeUnit;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
 
 public class MainActivity extends Activity {
 
-    private static final String LOVE = "心动是等你的留言，渴望是常和你见面，甜蜜是和你小路流连，温馨是看着你清澈的双眼，爱你的感觉真的妙不可言！";
+    private static final String LOVE = "遇见你是命运的安排而爱上你是我情不自禁...    \n\n女巫同学，        \n可以做我的女朋友吗 ❤️ ❤️ ❤️ ";
     private static final int SNOW_BLOCK = 1;
 
     private FlowerView mBlueSnowView;//蓝色的雪花
@@ -64,7 +57,6 @@ public class MainActivity extends Activity {
     private Random mRandom2 = new Random();
     private TimerTask mTask = null;
     private TypeTextView mTypeTextView;//打字机
-    private WebSettings mWebSettings;
 
     private SnowView mWhiteSnowView;//白色的雪花
     private Timer myTimer = null;
@@ -82,23 +74,27 @@ public class MainActivity extends Activity {
         showAllViews();
     }
 
-
-    private FrameLayout mWebViwFrameLayout = null;
-    private FrameLayout root_fragment_layout = null;
-    private TextView textview = null;
-
     private void initMediaPlayer() {
         try {
             AssetManager assetManager = getAssets();
-            AssetFileDescriptor fileDescriptor = assetManager.openFd("test.mp3");
+            AssetFileDescriptor fileDescriptor = assetManager.openFd("love.mp3");
             mediaPlayer.setDataSource(fileDescriptor.getFileDescriptor(),fileDescriptor.getStartOffset(),
                     fileDescriptor.getStartOffset());
             mediaPlayer.setLooping(true);//设置为循环播放
             mediaPlayer.prepare();//初始化播放器MediaPlayer
-//            mediaPlayer.start();
+            mediaPlayer.start();
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static void Shakeview( View view) {
+        Animation translateAnimation = new TranslateAnimation(-10, 10, 0, 0);
+        translateAnimation.setDuration(80);//每次时间
+        translateAnimation.setRepeatCount(100000000);//重复次数
+/**倒序重复REVERSE  正序重复RESTART**/
+        translateAnimation.setRepeatMode(Animation.REVERSE);
+        view.startAnimation(translateAnimation);
     }
 
     private void initView() {
@@ -112,8 +108,8 @@ public class MainActivity extends Activity {
         banner.start();
 
         heartBtn= findViewById(R.id.imageBtn);
-
-        root_fragment_layout = (FrameLayout) findViewById(R.id.root_fragment_layout);
+        Shakeview(heartBtn);
+        heartBtn.requestFocus();
 
         FrameLayout.LayoutParams fp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         fp.gravity = Gravity.CENTER;
@@ -157,7 +153,6 @@ public class MainActivity extends Activity {
         super.onDestroy();
         cancelTimer();
         mediaPlayer.stop();
-        unBindDrawables(findViewById(R.id.root_fragment_layout));
         System.gc();
     }
 
@@ -177,7 +172,7 @@ public class MainActivity extends Activity {
         this.heartBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                delayDo();
+//                delayDo();
             }
         });
     }
@@ -196,6 +191,7 @@ public class MainActivity extends Activity {
         Observable.timer(time, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Long>() {
                     public void onCompleted() {
+                        MainActivity.this.heartBtn.setVisibility(View.VISIBLE);
                         MainActivity.this.mTypeTextView.start(MainActivity.LOVE);
                     }
 
@@ -229,6 +225,7 @@ public class MainActivity extends Activity {
         Observable.timer(0, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Long>() {
                     public void onCompleted() {
+
                         MainActivity.this.mTypeTextView.setVisibility(View.VISIBLE);
                         MainActivity.this.delayShow(1000);//延时显示显示打印机
                     }
@@ -293,6 +290,36 @@ public class MainActivity extends Activity {
                 });
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+//        Toast.makeText(getApplicationContext(), " "+keyCode, Toast.LENGTH_LONG).show();
+        switch (keyCode) {
+            //模拟器测试时键盘中的的Enter键，模拟ok键（推荐TV开发中使用蓝叠模拟器）
+            case KeyEvent.KEYCODE_ENTER:
+                delayDo();
+                break;
+            case KeyEvent.KEYCODE_DPAD_CENTER:
+                delayDo();
+                break;
+
+//            case KeyEvent.KEYCODE_DPAD_DOWN:
+//                Toast("你按下下方向键");
+//                break;
+//
+//            case KeyEvent.KEYCODE_DPAD_LEFT:
+//                Toast("你按下左方向键");
+//                break;
+//
+//            case KeyEvent.KEYCODE_DPAD_RIGHT:
+//                Toast("你按下右方向键");
+//                break;
+//
+//            case KeyEvent.KEYCODE_DPAD_UP:
+//                Toast("你按下上方向键");
+//                break;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
 
     /**
      * remove View Drawables
