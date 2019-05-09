@@ -18,6 +18,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -48,13 +49,9 @@ import rx.schedulers.Schedulers;
 
 public class MainActivity extends Activity {
 
-    private static final String JPG = ".jpg";
     private static final String LOVE = "心动是等你的留言，渴望是常和你见面，甜蜜是和你小路流连，温馨是看着你清澈的双眼，爱你的感觉真的妙不可言！";
     private static final int SNOW_BLOCK = 1;
-    public static final String URL = "file:///android_asset/index.html";
-    public static final String URL_1 = "file:///android_asset/dongyu/linzhengxin.jpg";
-    private Canvas mCanvas;
-    private int mCounter;
+
     private FlowerView mBlueSnowView;//蓝色的雪花
     private Handler mHandler = new Handler() {
         public void dispatchMessage(Message msg) {
@@ -63,15 +60,15 @@ public class MainActivity extends Activity {
     };
     private HeartLayout mHeartLayout;//垂直方向的漂浮的红心
 
-    private ProgressBar mProgressBar;
     private Random mRandom = new Random();
     private Random mRandom2 = new Random();
     private TimerTask mTask = null;
     private TypeTextView mTypeTextView;//打字机
     private WebSettings mWebSettings;
-    private WebView mWebView;
+
     private SnowView mWhiteSnowView;//白色的雪花
     private Timer myTimer = null;
+    private ImageView heartBtn = null;
     private MediaPlayer mediaPlayer = new MediaPlayer();
 
     public void onCreate(Bundle savedInstanceState) {
@@ -79,7 +76,6 @@ public class MainActivity extends Activity {
         DeviceInfo.getInstance().initializeScreenInfo(this);
         setContentView(R.layout.activity_main);
         initView();
-        initWebView();
         bindListener();
         initMediaPlayer();
         delayShowAll(3000L);
@@ -105,16 +101,6 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void initWebView() {
-
-        this.mWebSettings = this.mWebView.getSettings();
-        this.mWebSettings.setJavaScriptEnabled(true);
-        this.mWebSettings.setBuiltInZoomControls(false);
-        this.mWebSettings.setLightTouchEnabled(false);
-        this.mWebSettings.setSupportZoom(false);
-        this.mWebView.setHapticFeedbackEnabled(false);
-    }
-
     private void initView() {
         Banner banner = (Banner) findViewById(R.id.banner);
         banner.setImageLoader(new GlideImageLoader());
@@ -125,23 +111,17 @@ public class MainActivity extends Activity {
         banner.setDelayTime(3000);
         banner.start();
 
-        mWebViwFrameLayout = (FrameLayout) findViewById(R.id.fl_webView_layout);
+        heartBtn= findViewById(R.id.imageBtn);
+
         root_fragment_layout = (FrameLayout) findViewById(R.id.root_fragment_layout);
-        textview = (TextView) findViewById(R.id.textview);
-        this.mWebView = new WebView(getApplicationContext());
-        this.mWebView.setScrollBarStyle(View.SCROLLBARS_OUTSIDE_OVERLAY);
-        this.mWebView.setVisibility(View.GONE);
-        //scrollbars
 
         FrameLayout.LayoutParams fp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         fp.gravity = Gravity.CENTER;
 
-        mWebViwFrameLayout.addView(mWebView);
-
         this.mHeartLayout = (HeartLayout) findViewById(R.id.heart_o_red_layout);
         this.mTypeTextView = (TypeTextView) findViewById(R.id.typeTextView);
         this.mWhiteSnowView = (SnowView) findViewById(R.id.whiteSnowView);
-        this.mProgressBar = (ProgressBar) findViewById(R.id.progressbar);
+
         this.mBlueSnowView = (FlowerView) findViewById(R.id.flowerview);
         this.mBlueSnowView.setWH(DeviceInfo.mScreenWidthForPortrait, DeviceInfo.mScreenHeightForPortrait, DeviceInfo.mDensity);
         this.mBlueSnowView.loadFlower();
@@ -177,24 +157,6 @@ public class MainActivity extends Activity {
         super.onDestroy();
         cancelTimer();
         mediaPlayer.stop();
-        if (this.mWebView != null) {
-            //            this.mWebView.clearCache(true);
-            //            this.mWebView.clearHistory();
-            //            this.mWebView.clearView();
-            //            this.mWebView.clearFormData();
-            //            this.mWebView.clearMatches();
-            //            this.mWebView.clearSslPreferences();
-            //            this.mWebView.clearAnimation();
-            //            this.mWebView.clearFocus();
-            //            this.mWebView.removeAllViewsInLayout();
-            if (mWebViwFrameLayout != null) {
-                this.mWebViwFrameLayout.removeAllViewsInLayout();
-                this.mWebViwFrameLayout.removeAllViews();
-            }
-            this.mWebView.removeAllViews();
-            this.mWebView.destroy();
-            this.mWebView = null;
-        }
         unBindDrawables(findViewById(R.id.root_fragment_layout));
         System.gc();
     }
@@ -212,8 +174,7 @@ public class MainActivity extends Activity {
 
     private void showAllViews() {
         this.mWhiteSnowView.setVisibility(View.VISIBLE);
-        this.textview.setVisibility(View.VISIBLE);
-        this.textview.setOnClickListener(new View.OnClickListener() {
+        this.heartBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 delayDo();
@@ -268,6 +229,7 @@ public class MainActivity extends Activity {
         Observable.timer(0, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<Long>() {
                     public void onCompleted() {
+                        MainActivity.this.mTypeTextView.setVisibility(View.VISIBLE);
                         MainActivity.this.delayShow(1000);//延时显示显示打印机
                     }
 
@@ -293,29 +255,6 @@ public class MainActivity extends Activity {
                     }
                 });
     }
-
-    //    @Override
-    //    public boolean onKeyDown(int keyCode, KeyEvent event) {
-    //        if (keyCode == KeyEvent.KEYCODE_BACK) {
-    //            if (this.mWebView != null) {
-    //                this.mWebView.clearCache(true);
-    //                this.mWebView.clearHistory();
-    //                this.mWebView.clearView();
-    //                this.mWebView.clearFormData();
-    //                this.mWebView.clearMatches();
-    //                this.mWebView.clearSslPreferences();
-    //                this.mWebView.clearAnimation();
-    //                this.mWebView.clearFocus();
-    //                this.mWebView.removeAllViewsInLayout();
-    //                this.mWebView = null;
-    //            }
-    //            System.gc();
-    //            unBindDrawables(findViewById(R.id.root_fragment_layout));
-    //            this.finish();
-    //        }
-    //        return false;
-    //    }
-
 
     private int randomColor() {
         return Color.rgb(mRandom.nextInt(255), mRandom.nextInt(255), mRandom.nextInt(255));
